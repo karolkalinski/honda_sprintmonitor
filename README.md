@@ -46,21 +46,19 @@ logging.basicConfig(level=logging.INFO)
 
 # It's recommended to also add HONDA_VIN to your environment or ~/.env_sprintmonitor
 os.environ["HONDA_VIN"] = "YOUR_HONDA_VIN_OR_NICKNAME"
-SPRITMONITOR_TANK_ID = 1
 
 # 1. Initialize the adapter
-adapter = HondaToSpritmonitor()
+# If your tokens might be expired and you want the script to automatically
+# login and refresh them, set allow_login=True (requires HONDA_EMAIL and HONDA_PASSWORD in environment)
+adapter = HondaToSpritmonitor(allow_login=True)
 
-# 2. Sync a refueling session
+# 2. Sync a refueling session (gasoline)
 # Example: You just added 35.5 liters of fuel. 
 # The script will auto-fetch your car's odometer and calculate the trip distance.
 try:
     success = adapter.sync_refueling(
-        spritmonitor_tank_id=SPRITMONITOR_TANK_ID,
-        quantity=35.5,
+        liters=35.5,
         fueling_type="full", # 'full', 'notfull', or 'first'
-        fuelsortid=7,        # E.g. 7 for Gasoline, 5 for Electricity, etc.
-        quantityunitid=1,    # E.g. 1 for Liters, 5 for kWh
         
         # Optional: you can pass any other Spritmonitor parameter here
         # price=55.0,
@@ -70,14 +68,41 @@ try:
         print("Refueling synced successfully!")
 except Exception as e:
     print(f"Failed to sync: {e}")
+
+# 3. Sync a charging session (electricity)
+# Example: You just charged 10.2 kWh of electricity.
+try:
+    success = adapter.sync_charging(
+        kwh=10.2,
+        fueling_type="full",
+    )
+    if success:
+        print("Charging session synced successfully!")
+except Exception as e:
+    print(f"Failed to sync: {e}")
 ```
 
 ### Usage as a CLI Script
 
 You can also run the adapter directly from your terminal! Just make sure your `~/.env_sprintmonitor` contains the `SPRITMONITOR_APP_ID`, `SPRITMONITOR_BEARER`, `SPRITMONITOR_VEHICLE_ID`, and `HONDA_VIN`.
 
+For gasoline (in liters):
 ```bash
-python honda_spritmonitor.py --tank-id 1 --quantity 35.5 --type full
+python honda_spritmonitor.py --gasoline 35.5 --type full
+```
+
+For electricity (in kWh):
+```bash
+python honda_spritmonitor.py --electricity 10.2 --type full
+```
+
+### Token Expiration & Re-Login
+
+Honda tokens eventually expire (usually after about 30 days). When they do, the script will output an error. If you've placed your `HONDA_EMAIL` and `HONDA_PASSWORD` in your `.env_sprintmonitor` file, you can allow the script to automatically perform a full login, generate new tokens, and save them. 
+
+Just append the `--allow-login` flag:
+```bash
+python honda_spritmonitor.py --gasoline 35.5 --allow-login
 ```
 
 Use `python honda_spritmonitor.py --help` for a full list of available options.
