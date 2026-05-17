@@ -132,7 +132,12 @@ class HondaToSpritmonitor:
             auth = HondaAuth()
             tokens = auth.full_login(self.honda_email, self.honda_password)
             self.honda_api = HondaAPI()
-            self.honda_api.set_tokens(**tokens)
+            
+            # Filter tokens to only include what set_tokens accepts
+            valid_keys = {"access_token", "refresh_token", "expires_in", "personal_id", "user_id", "vehicles"}
+            filtered_tokens = {k: v for k, v in tokens.items() if k in valid_keys}
+            
+            self.honda_api.set_tokens(**filtered_tokens)
             logger.info("Authenticated with Honda API via email/password successfully.")
 
     def get_honda_odometer(self, vin: str) -> float:

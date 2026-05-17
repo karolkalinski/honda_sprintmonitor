@@ -16,6 +16,17 @@ Install the dependencies:
 pip install -r requirements.txt
 ```
 
+## Configuration
+
+A template configuration file has been provided: `.env_sprintmonitor.example`.
+Copy this file to your home directory or your project root and rename it to `.env_sprintmonitor`:
+
+```bash
+cp .env_sprintmonitor.example ~/.env_sprintmonitor
+```
+
+Fill out your credentials in the newly created `.env_sprintmonitor` file.
+
 ## Usage as a Library
 
 You can easily embed `HondaToSpritmonitor` into your own scripts or Home Assistant automations.
